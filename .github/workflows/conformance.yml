@@ -46,9 +46,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The toolchain CI builds and judges with, which is not go.mod's floor: the floor is the oldest
+      # Go a consumer may use, and its standard library carries advisories govulncheck would report
+      # against code nobody here ships.
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version-file: go.mod
+          go-version: '1.27.3'
       - run: go build -o driver ./conformance
 
       - name: The runner, verified against the release that published it
