@@ -114,6 +114,10 @@ func (e *Error) Is(target error) bool {
 		return e.Status == http.StatusForbidden && e.Code == "forbidden"
 	case ErrExportTooLarge:
 		return e.Status == http.StatusUnprocessableEntity && e.Code == "export_too_large"
+	case ErrArtifactNotFound:
+		return e.Status == http.StatusNotFound && e.Code == "not_found"
+	case ErrArtifactConflict:
+		return e.Status == http.StatusConflict && e.Code == "artifact_conflict"
 	}
 	return false
 }

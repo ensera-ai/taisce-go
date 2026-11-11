@@ -7,10 +7,14 @@ Memory for agents built on the [Microsoft Agent Framework for Go](https://github
 backed by a [Taisce](https://github.com/ensera-ai/taisce) deployment you run.
 
 - `github.com/ensera-ai/taisce-go` is the client over the deployment's v1 contract: observe,
-  freshness, recall, context, citations, erasure and export.
-- `github.com/ensera-ai/taisce-go/agentframework` is the adapter, at the framework's own seam:
-  `ContextProvider` recalls before a run and stores the turn after it, and `Compaction` replaces a
-  long history with the deployment's context.
+  freshness, recall, context, citations, passage search, artifacts, erasure and export.
+- `github.com/ensera-ai/taisce-go/agentframework` is the adapter, on four of the framework's own
+  seams:
+  - `ContextProvider` recalls before a run and stores the turn after it;
+  - `Compaction` replaces a long history with the deployment's context;
+  - `SessionStore` keeps the framework's session where the memory formed from it already lives;
+  - `NewTextSearchProvider` binds the deployment's passage search to the framework's text-search
+    seam, for grounding without forming anything.
 
 ```go
 client, err := taisce.New("https://memory.example", os.Getenv("TAISCE_TOKEN"))
@@ -51,6 +55,20 @@ but cannot erase anybody.
 - **Compaction is replacement, never a summary.** When the loaded history is longer than
   `AfterMessages`, `Compaction` asks the deployment for the person's context and puts it, unchanged,
   in place of that history. A context that cannot be fetched leaves the history as it was.
+- **A session belongs to a person, and lives where their memory does.** The framework ships no
+  durable session store, so every application invents one — and inventing it in the application's own
+  database splits one person's data across two systems, which gives a deletion two places to sweep
+  and only one that can produce a counted residual. `SessionStore` keeps the serialized session as an
+  artifact under the subject: the deployment never reads it, expires it with that person's retention,
+  and removes it with that person's erasure. Every call names the subject, and the deployment answers
+  another person's session exactly as one that does not exist. A save carries the version it expects
+  to replace, so two turns of one session cannot silently lose a write.
+- **Passage search grounds without forming anything.** `NewTextSearchProvider` recalls nothing and
+  stores nothing: it searches what was actually said and hands it to the model under the same
+  untrusted mark the memory message carries, because a passage is something somebody said. When the
+  deployment says the index behind the answer is still building, the model is told so in the text it
+  reads — a model handed an incomplete answer as though it were complete answers confidently from
+  it.
 
 ## Erasure and export
 
