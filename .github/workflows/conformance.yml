@@ -36,11 +36,11 @@ env:
   # The release this adapter is tested against: its binary carries the suite runner, and its images
   # are the deployment. Raised deliberately, so that what an adapter was proven against is a fact in
   # this file rather than whatever was newest on the day.
-  TAISCE_VERSION: v0.5.1
+  TAISCE_VERSION: v0.7.1
   # The commit that release was cut from, for the two files that are not release assets. A commit
   # cannot be moved; a tag can be moved by whoever controls it, which is why the actions below are
   # pinned the same way.
-  TAISCE_COMMIT: 16ced9eb409bd2ad543d1c4fb2d59cf5911390db
+  TAISCE_COMMIT: 16807ad0a7063569c1fb2475aac8484fc89d5562
 jobs:
   conformance:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
       # against code nobody here ships.
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version: '1.27.3'
+          go-version: '1.27.4'
       - run: go build -o driver ./conformance
 
       - name: The runner, verified against the release that published it
